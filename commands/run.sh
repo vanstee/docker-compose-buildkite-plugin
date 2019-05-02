@@ -273,18 +273,27 @@ fi
 
 if [[ -n "${BUILDKITE_AGENT_ACCESS_TOKEN:-}" ]] ; then
   if [[ "$(plugin_read_config CHECK_LINKED_CONTAINERS "true")" != "false" ]] ; then
+    failed=0
 
-    # Get list of failed containers
-    failed_containers=($(
-      docker inspect -f '{{if ne 0 .State.ExitCode}}{{.Name}}.{{.State.ExitCode}}{{ end }}' \
-      $(docker_ps_by_project -q)
-    ))
+    # Read containers that were part of the project, not entirely
+    # sure if this is race condition-y. I suspect it is.
+    while read -r line ; do
+      echo "container: $line"
+    done <<< "$(docker_ps_by_project -q)"
 
-    if [[ 0 != "${#failed_containers[@]}" ]] ; then
-      echo "+++ :warning: Some containers had non-zero exit codes"
-      docker_ps_by_project \
-        --format 'table {{.Label "com.docker.compose.service"}}\t{{ .ID }}\t{{ .Status }}'
-    fi
+    # Filter the list to just failed containers
+    # failed_containers=()
+
+    # while read -r line ; do
+    #   [[ -n "$line" ]] && failed_containers+=("$line")
+    # done <<< "$(docker inspect -f \
+    #   '{{if ne 0 .State.ExitCode}}{{.Name}}.{{.State.ExitCode}}{{ end }}')"
+
+    # if [[ ${#failed_containers[@]} -gt 0 ]] ; then
+    #   echo "+++ :warning: Some containers had non-zero exit codes"
+    #   docker_ps_by_project \
+    #     --format 'table {{.Label "com.docker.compose.service"}}\t{{ .ID }}\t{{ .Status }}'
+    # fi
 
     check_linked_containers_and_save_logs "$run_service" "docker-compose-logs"
 
