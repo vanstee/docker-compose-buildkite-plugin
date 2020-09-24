@@ -74,6 +74,8 @@ configuration:
       type: boolean
     mount-buildkite-agent:
       type: boolean
+    buildkit-inline-cache:
+      type: boolean
   oneOf:
     - required:
       - run
@@ -100,3 +102,4 @@ configuration:
     user: [ run ]
     propagate-uid-gid: [ run ]
     mount-buildkite-agent: [ run ]
+    buildkit-inline-cache: [ build ]

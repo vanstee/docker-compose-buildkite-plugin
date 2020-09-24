@@ -499,3 +499,22 @@ load '../lib/shared'
   unstub docker-compose
   unstub buildkite-agent
 }
+
+@test "Build with buildkit-inline-cache" {
+  export BUILDKITE_JOB_ID=1111
+  export BUILDKITE_PLUGIN_DOCKER_COMPOSE_BUILD=myservice
+  export BUILDKITE_PIPELINE_SLUG=test
+  export BUILDKITE_BUILD_NUMBER=1
+  export BUILDKITE_PLUGIN_DOCKER_COMPOSE_ARGS_0=MYARG=0
+  export BUILDKITE_PLUGIN_DOCKER_COMPOSE_ARGS_1=MYARG=1
+  export BUILDKITE_PLUGIN_DOCKER_COMPOSE_BUILDKIT_INLINE_CACHE=true
+
+  stub docker-compose \
+    "-f docker-compose.yml -p buildkite1111 -f docker-compose.buildkite-1-override.yml build --pull --build-arg BUILDKIT_INLINE_CACHE=1 --build-arg MYARG=0 --build-arg MYARG=1 myservice : echo built myservice"
+
+  run $PWD/hooks/command
+
+  assert_success
+  assert_output --partial "built myservice"
+  unstub docker-compose
+}

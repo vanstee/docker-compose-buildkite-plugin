@@ -365,6 +365,12 @@ Whether to automatically mount the `buildkite-agent` binary and associated envir
 
 Default: `false`
 
+### `buildkit-inline-cache` (optional, build-only, boolean)
+
+Whether to pass the `BUILDKIT_INLINE_CACHE=1` build arg when building an image. Can be safely used in combination with `args`.
+
+Default: `false`
+
 ### `pull-retries` (optional)
 
 A number of times to retry failed docker pull. Defaults to 0.
